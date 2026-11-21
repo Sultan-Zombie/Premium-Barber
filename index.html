@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#20221e">
+  <title>Premium Barber | Appointments</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20221e;
+      --muted: #73756d;
+      --paper: #f5f4ef;
+      --white: #fffefa;
+      --line: #deded5;
+      --olive: #72784b;
+      --olive-dark: #4a5032;
+      --red: #b94d39;
+      --green: #376c50;
+      --gold: #c7a86c;
+      --serif: 'Playfair Display', Georgia, serif;
+      --sans: 'DM Sans', sans-serif;
+      --radius: 3px;
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--paper);
+      font-synthesis: none;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background: var(--paper); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--olive); outline-offset: 2px; }
+    .topbar { height: 76px; padding: 0 max(5vw, 24px); display: flex; align-items: center; justify-content: space-between; gap: 20px; background: var(--ink); color: var(--white); }
+    .brand { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+    .brand-mark { width: 35px; height: 35px; border: 1px solid var(--gold); display: grid; place-items: center; color: var(--gold); font: 600 19px var(--serif); }
+    .brand-copy { display: grid; gap: 2px; }
+    .brand-name { font: 600 17px var(--serif); letter-spacing: .4px; }
+    .brand-caption { color: #b9b8ad; font-size: 9px; letter-spacing: 1.7px; text-transform: uppercase; }
+    .nav { height: 100%; display: flex; align-items: center; gap: 6px; }
+    .nav button { height: 100%; padding: 0 15px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #c9c8bf; font-size: 12px; transition: color .18s, border-color .18s; }
+    .nav button:hover, .nav button.active { color: var(--white); border-bottom-color: var(--gold); }
+    .top-appointment { display: flex; align-items: center; gap: 8px; color: #dbd9cd; font-size: 11px; }
+    .open-dot { width: 7px; height: 7px; border-radius: 50%; background: #98ae70; box-shadow: 0 0 0 3px #98ae7025; }
+    main { min-height: calc(100vh - 76px); }
+    .view { display: none; }
+    .view.active { display: block; animation: appear .24s ease-out; }
+    @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .booking-layout { max-width: 1380px; margin: auto; padding: 38px 5vw 58px; display: grid; grid-template-columns: minmax(330px, .92fr) minmax(490px, 1.08fr); gap: clamp(32px, 6vw, 88px); align-items: start; }
+    .intro { position: sticky; top: 24px; }
+    .eyebrow { margin: 0 0 13px; color: var(--olive-dark); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    .intro h1 { max-width: 500px; margin: 0; font: 500 clamp(40px, 5vw, 67px)/1.07 var(--serif); letter-spacing: 0; }
+    .intro h1 span { color: var(--olive); font-style: italic; }
+    .intro-copy { max-width: 390px; margin: 17px 0 22px; color: #6f7169; font-size: 13px; line-height: 1.8; }
+    .shop-photo { position: relative; min-height: 320px; overflow: hidden; background: #36352f; }
+    .shop-photo img { position: absolute; width: 100%; height: 100%; object-fit: cover; object-position: 50% 48%; filter: saturate(.72); }
+    .photo-shade { position: absolute; inset: 0; background: linear-gradient(180deg, #17181300 38%, #171813c9 100%); }
+    .photo-caption { position: absolute; right: 20px; bottom: 18px; left: 20px; display: flex; justify-content: space-between; align-items: end; gap: 14px; color: white; }
+    .photo-caption strong { display: block; margin-bottom: 5px; font: 500 21px var(--serif); }
+    .photo-caption span { color: #e2dfd5; font-size: 10px; letter-spacing: .2px; }
+    .chair-count { padding: 8px 10px; border: 1px solid #ffffff72; font-size: 9px; letter-spacing: 1px; white-space: nowrap; }
+    .intro-meta { display: flex; gap: 24px; padding-top: 17px; color: var(--muted); font-size: 10px; }
+    .intro-meta strong { color: var(--ink); font-weight: 600; }
+    .intro-tools { margin-top: 20px; padding: 17px 0 0; border-top: 1px solid var(--line); }
+    .intro-tools h2 { margin: 0; font: 500 18px var(--serif); }
+    .share-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .share-button { min-height: 32px; padding: 0 9px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); background: var(--white); color: var(--ink); font-size: 9px; text-decoration: none; }
+    .share-button:hover { border-color: var(--olive); color: var(--olive-dark); }
+    .rating-summary { display: flex; align-items: baseline; gap: 8px; margin-top: 17px; }
+    .rating-average { font: 500 22px var(--serif); }
+    .rating-stars { color: #a18142; letter-spacing: 1px; }
+    .rating-count { color: var(--muted); font-size: 9px; }
+    .public-review-list { display: grid; gap: 9px; margin-top: 11px; }
+    .public-review { padding-top: 10px; border-top: 1px solid var(--line); }
+    .public-review blockquote { margin: 5px 0; color: #595b53; font: 400 12px/1.6 var(--serif); }
+    .public-review-meta { color: var(--muted); font-size: 9px; }
+    .star-picker { display: flex; gap: 5px; }
+    .star-picker label { position: relative; width: 35px; height: 35px; display: grid; place-items: center; border: 1px solid var(--line); color: #8d8e85; cursor: pointer; }
+    .star-picker label:hover, .star-picker label:has(input:checked) { border-color: var(--gold); color: #94733b; background: #f7f3e9; }
+    .star-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .star-picker input:focus-visible + span { outline: 2px solid var(--olive); outline-offset: 3px; }
+    .star-picker span { font-size: 17px; }
+    .review-form { display: grid; gap: 13px; }
+    .review-form textarea { width: 100%; min-height: 100px; padding: 10px; resize: vertical; border: 1px solid var(--line); border-radius: 0; background: var(--white); color: var(--ink); font: 11px/1.6 var(--sans); }
+    .review-form textarea:focus-visible { outline: 2px solid var(--olive); outline-offset: 2px; }
+    .review-status { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .form-panel { padding: 26px 28px 25px; border: 1px solid var(--line); background: var(--white); box-shadow: 0 12px 35px #25271b0a; }
+    .form-heading { display: flex; justify-content: space-between; align-items: start; gap: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+    .form-heading h2 { margin: 0; font: 500 24px var(--serif); }
+    .form-heading p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+    .step-count { padding-top: 6px; color: var(--olive-dark); font-size: 10px; white-space: nowrap; }
+    .section-label { display: flex; align-items: center; gap: 9px; margin: 21px 0 11px; font-size: 11px; font-weight: 700; }
+    .section-num { width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid #b5b69f; border-radius: 50%; color: var(--olive-dark); font-size: 9px; }
+    .style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .style-option { position: relative; }
+    .style-option input, .service-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .style-option label { min-height: 72px; padding: 11px 9px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; border: 1px solid var(--line); cursor: pointer; transition: border-color .15s, background .15s; }
+    .style-option label:hover, .service-option label:hover { border-color: #9da17b; }
+    .style-option input:checked + label { border-color: var(--olive-dark); background: #f0f1e8; box-shadow: inset 0 0 0 1px var(--olive-dark); }
+    .style-option input:focus-visible + label, .service-option input:focus-visible + label { outline: 2px solid var(--olive); outline-offset: 2px; }
+    .style-name { font-size: 10px; font-weight: 600; }
+    .style-price { color: var(--muted); font-size: 10px; }
+    .service-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .service-option { position: relative; }
+    .service-option label { min-height: 54px; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid var(--line); cursor: pointer; transition: border-color .15s, background .15s; }
+    .service-option input:checked + label { border-color: var(--olive-dark); background: #f0f1e8; }
+    .service-name { font-size: 10px; line-height: 1.35; }
+    .service-price { flex: 0 0 auto; color: #55594a; font-size: 10px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field { min-width: 0; display: grid; gap: 6px; }
+    .field label { color: #4a4b45; font-size: 10px; font-weight: 600; }
+    .field input, .field select { width: 100%; height: 40px; padding: 0 10px; border: 1px solid var(--line); border-radius: 0; background: var(--white); color: var(--ink); font-size: 11px; }
+    .field input:disabled, .field select:disabled { background: #f0efe9; color: #9b9b91; }
+    .time-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+    .time-button { min-height: 34px; border: 1px solid var(--line); background: white; color: var(--ink); font-size: 10px; }
+    .time-button:hover:not(:disabled), .time-button.selected { border-color: var(--olive-dark); background: var(--olive-dark); color: white; }
+    .time-button:disabled { color: #b8b8b1; background: #f3f2ed; cursor: not-allowed; text-decoration: line-through; }
+    .time-empty { grid-column: 1/-1; padding: 12px; background: #f5f4ef; color: var(--muted); font-size: 10px; text-align: center; }
+    .form-foot { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .total-label { color: var(--muted); font-size: 10px; }
+    .total-amount { margin-top: 3px; font: 500 20px var(--serif); }
+    .primary-button { min-height: 42px; padding: 0 17px; border: 0; background: var(--olive-dark); color: white; font-size: 11px; font-weight: 600; transition: background .15s; }
+    .primary-button:hover { background: #353a25; }
+    .subtle-note { margin: 12px 0 0; color: #898a81; font-size: 9px; line-height: 1.6; }
+    .page-wrap { max-width: 1220px; margin: auto; padding: 52px 5vw 70px; }
+    .page-title-row { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 29px; }
+    .page-title-row h1 { margin: 0; font: 500 40px/1.1 var(--serif); }
+    .page-title-row p { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+    .text-link { padding: 10px 0; border: 0; border-bottom: 1px solid var(--olive); background: transparent; color: var(--olive-dark); font-size: 11px; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 30px; }
+    .metric { padding: 17px 18px; border: 1px solid var(--line); background: var(--white); }
+    .metric span { display: block; color: var(--muted); font-size: 10px; }
+    .metric strong { display: block; margin-top: 10px; font: 500 27px var(--serif); }
+    .metric small { display: block; margin-top: 4px; color: #85867d; font-size: 9px; }
+    .content-panel { border: 1px solid var(--line); background: var(--white); }
+    .panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 17px 19px; border-bottom: 1px solid var(--line); }
+    .panel-heading h2 { margin: 0; font: 500 19px var(--serif); }
+    .panel-heading p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .panel-content { padding: 18px 19px; }
+    .booking-list { display: grid; gap: 9px; }
+    .booking-card { padding: 14px; display: grid; grid-template-columns: minmax(140px, 1fr) minmax(150px, 1.1fr) auto; align-items: center; gap: 18px; border: 1px solid var(--line); }
+    .booking-person { font-size: 11px; font-weight: 700; }
+    .booking-phone, .booking-detail { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; }
+    .booking-detail strong { color: var(--ink); font-weight: 600; }
+    .booking-actions { display: flex; justify-content: end; flex-wrap: wrap; gap: 6px; }
+    .status { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; background: #f1f0eb; color: #686961; font-size: 9px; white-space: nowrap; }
+    .status::before { width: 6px; height: 6px; border-radius: 50%; background: currentColor; content: ''; }
+    .status.pending { background: #faf1df; color: #946a20; }
+    .status.accepted { background: #e8f1eb; color: #376c50; }
+    .status.rejected { background: #f7eae6; color: #a54634; }
+    .status.rescheduled { background: #e9edf3; color: #4d6281; }
+    .action-button { min-height: 31px; padding: 0 9px; border: 1px solid var(--line); background: white; color: var(--ink); font-size: 9px; }
+    .action-button:hover { border-color: #8c9070; }
+    .action-button.accept { border-color: #cad9ce; color: var(--green); }
+    .action-button.reject, .action-button.danger { border-color: #e5c7c0; color: var(--red); }
+    .empty-state { padding: 33px 15px; color: var(--muted); font-size: 11px; text-align: center; }
+    .empty-state strong { display: block; margin-bottom: 5px; color: var(--ink); font: 500 17px var(--serif); }
+    .schedule-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 13px; margin-bottom: 25px; }
+    .schedule-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .days-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .day-toggle { display: flex; align-items: center; gap: 7px; color: #4a4b45; font-size: 10px; }
+    .day-toggle input { accent-color: var(--olive-dark); }
+    .compact-button { min-height: 35px; padding: 0 12px; border: 1px solid var(--line); background: white; color: var(--ink); font-size: 10px; }
+    .compact-button:hover { border-color: var(--olive); }
+    .data-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 23px; }
+    .data-tile { padding: 16px; border: 1px solid var(--line); background: var(--white); }
+    .data-tile span { color: var(--muted); font-size: 10px; }
+    .data-tile strong { display: block; margin-top: 8px; font: 500 23px var(--serif); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 10px 12px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .7px; }
+    td { padding: 12px; border-bottom: 1px solid #ecebe5; font-size: 10px; white-space: nowrap; }
+    tr:last-child td { border-bottom: 0; }
+    .database-note { margin: 0; padding: 12px 14px; border-left: 2px solid var(--gold); background: #f7f5ef; color: #6f7067; font-size: 10px; line-height: 1.6; }
+    .database-tools { display: flex; gap: 8px; }
+    dialog { width: min(440px, calc(100% - 28px)); padding: 0; border: 1px solid var(--line); background: var(--white); color: var(--ink); box-shadow: 0 18px 80px #11130f3b; }
+    dialog::backdrop { background: #17181391; }
+    .dialog-inner { padding: 22px; }
+    .dialog-inner h2 { margin: 0; font: 500 22px var(--serif); }
+    .dialog-inner > p { margin: 7px 0 19px; color: var(--muted); font-size: 11px; }
+    .dialog-fields { display: grid; gap: 13px; }
+    .dialog-actions { display: flex; justify-content: end; gap: 8px; margin-top: 20px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 5; max-width: min(360px, calc(100vw - 44px)); padding: 13px 16px; background: var(--ink); color: white; font-size: 11px; box-shadow: 0 8px 25px #0002; opacity: 0; transform: translateY(10px); pointer-events: none; transition: .2s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 920px) {
+      .booking-layout { grid-template-columns: minmax(280px, .8fr) minmax(430px, 1.2fr); gap: 25px; }
+      .form-panel { padding: 22px 19px; }
+      .top-appointment { display: none; }
+    }
+    @media (max-width: 720px) {
+      .topbar { height: auto; min-height: 68px; padding: 0 18px; flex-wrap: wrap; gap: 0; }
+      .brand { height: 64px; }
+      .nav { width: 100%; height: 45px; justify-content: space-between; }
+      .nav button { padding: 0 9px; font-size: 10px; }
+      main { min-height: calc(100vh - 109px); }
+      .booking-layout { padding: 28px 18px 40px; grid-template-columns: 1fr; gap: 22px; }
+      .intro { position: static; }
+      .intro h1 { max-width: 550px; font-size: clamp(40px, 12vw, 58px); }
+      .intro-copy { margin: 10px 0 16px; }
+      .shop-photo { min-height: 220px; }
+      .intro-meta { padding-top: 12px; }
+      .form-panel { padding: 19px 15px; }
+      .page-wrap { padding: 32px 18px 45px; }
+      .page-title-row h1 { font-size: 34px; }
+      .metric-grid { grid-template-columns: 1fr 1fr; }
+      .booking-card { grid-template-columns: 1fr auto; gap: 10px; }
+      .booking-card > :nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+      .booking-actions { grid-column: 1 / -1; justify-content: start; }
+      .schedule-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 440px) {
+      .brand-name { font-size: 15px; }
+      .brand-caption { font-size: 8px; }
+      .style-grid { grid-template-columns: repeat(2, 1fr); }
+      .time-grid { grid-template-columns: repeat(4, 1fr); }
+      .form-row { grid-template-columns: 1fr; }
+      .form-foot { align-items: end; }
+      .primary-button { padding: 0 11px; font-size: 10px; }
+      .data-summary { grid-template-columns: 1fr; }
+      .panel-content { padding: 13px; }
+      .panel-heading { padding: 14px; }
+      .database-tools { flex-direction: column; }
+      .days-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#book" aria-label="Premium Barber home">
+      <span class="brand-mark" aria-hidden="true">P</span>
+      <span class="brand-copy"><span class="brand-name">Premium Barber</span><span class="brand-caption">Crafted with intention</span></span>
+    </a>
+    <nav class="nav" id="main-navigation" aria-label="Main navigation"></nav>
+    <div class="top-appointment"><span class="open-dot"></span> Nairobi & Mombasa · By appointment</div>
+  </header>
+
+  <main>
+    <section class="view active" id="view-book" aria-label="Book an appointment">
+      <div class="booking-layout">
+        <section class="intro">
+          <p class="eyebrow">Nairobi & Mombasa · Personal grooming</p>
+          <h1>A sharper look.<br><span>A better hour.</span></h1>
+          <p class="intro-copy">Thoughtful cuts, considered detail, and a chair kept just for you. Choose your style and find a time that works.</p>
+          <div class="shop-photo">
+            <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&amp;fit=crop&amp;w=1100&amp;q=85" alt="A warmly lit, classic barbershop interior">
+            <div class="photo-shade"></div>
+            <div class="photo-caption"><div><strong>The good chair awaits.</strong><span>Professional barbering, on your schedule.</span></div><span class="chair-count">EST. 2018</span></div>
+          </div>
+          <div class="intro-meta"><span id="public-hours"></span><span><strong>From KSh 2,500</strong></span></div>
+          <section class="intro-tools" aria-label="Share Premium Barber">
+            <h2>Send a friend our way.</h2>
+            <div class="share-buttons">
+              <a class="share-button" id="share-whatsapp" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+              <a class="share-button" id="share-facebook" target="_blank" rel="noopener noreferrer">Facebook</a>
+              <a class="share-button" id="share-x" target="_blank" rel="noopener noreferrer">X</a>
+              <a class="share-button" id="share-telegram" target="_blank" rel="noopener noreferrer">Telegram</a>
+              <a class="share-button" id="share-email">Email</a>
+              <button class="share-button" id="share-native" type="button">Share…</button>
+              <button class="share-button" id="copy-share-link" type="button">Copy link</button>
+            </div>
+          </section>
+          <section class="intro-tools" aria-label="Customer reviews">
+            <h2>Good words travel.</h2>
+            <div class="rating-summary"><strong class="rating-average" id="rating-average">New</strong><span class="rating-stars" id="rating-stars" aria-label="No reviews yet">☆☆☆☆☆</span><span class="rating-count" id="rating-count">No reviews yet</span></div>
+            <div class="public-review-list" id="public-review-list"><p class="review-status">Customer reviews will appear here.</p></div>
+          </section>
+        </section>
+
+        <form class="form-panel" id="booking-form">
+          <div class="form-heading"><div><h2>Reserve your chair</h2><p>Pick a cut, add a little extra, and choose a time.</p></div><span class="step-count">01 — YOUR VISIT</span></div>
+          <div class="section-label"><span class="section-num">1</span> Choose your cut</div>
+          <div class="style-grid" id="style-options"></div>
+          <div class="section-label"><span class="section-num">2</span> Add a service</div>
+          <div class="service-grid" id="service-options"></div>
+          <div class="section-label"><span class="section-num">3</span> Choose your barber & location</div>
+          <div class="form-row">
+            <div class="field"><label for="preferred-barber">Preferred barber</label><select id="preferred-barber" name="barber" required><option value="">Choose a barber</option><option value="Msanii">Msanii</option><option value="Gadaffi">Gadaffi</option><option value="Eric">Eric</option></select></div>
+            <div class="field"><label for="preferred-location">Location</label><select id="preferred-location" name="location" required><option value="">Choose a location</option><option value="Nairobi">Nairobi</option><option value="Mombasa">Mombasa</option></select></div>
+          </div>
+          <div class="section-label"><span class="section-num">4</span> Choose a day and time</div>
+          <div class="form-row">
+            <div class="field"><label for="appointment-date">Appointment date</label><input id="appointment-date" name="date" type="date" required></div>
+            <div class="field"><label for="appointment-time">Available times</label><select id="appointment-time" name="time" required disabled><option value="">Select a date first</option></select></div>
+          </div>
+          <div class="section-label"><span class="section-num">5</span> Your details</div>
+          <div class="form-row">
+            <div class="field"><label for="customer-name">Full name</label><input id="customer-name" name="name" autocomplete="name" placeholder="Your name" required maxlength="80"></div>
+            <div class="field"><label for="customer-phone">Phone number</label><input id="customer-phone" name="phone" type="tel" autocomplete="tel" placeholder="e.g. 0712 345 678" required maxlength="20"></div>
+          </div>
+          <div class="form-row" style="margin-top:11px">
+            <div class="field"><label for="payment-method">Payment method</label><select id="payment-method" name="payment" required><option value="M-Pesa">M-Pesa</option><option value="Google Pay">Google Pay</option><option value="Bank transfer">Bank transfer</option><option value="Card">Debit / credit card</option><option value="Pay at shop">Pay at the shop</option></select></div>
+            <div class="field"><label for="booking-note">Note for your barber <span style="font-weight:400;color:#898a81">· optional</span></label><input id="booking-note" name="note" placeholder="Anything we should know?" maxlength="180"></div>
+          </div>
+          <div class="form-foot"><div><div class="total-label">Estimated total</div><div class="total-amount" id="booking-total">KSh 0</div></div><button class="primary-button" type="submit">Request appointment <span aria-hidden="true">→</span></button></div>
+          <p class="subtle-note">Your appointment is pending until the barber confirms it. Payment options are saved with your request; online payment processing is not connected.</p>
+        </form>
+      </div>
+    </section>
+
+    <section class="view" id="view-visits" aria-label="My visits">
+      <div class="page-wrap">
+        <div class="page-title-row"><div><p class="eyebrow">Customer account</p><h1>Your visits</h1><p>Look up your appointments with the phone number used to book.</p></div><button class="text-link" type="button" data-go="book">Book a new visit →</button></div>
+        <div class="content-panel" style="max-width:700px;margin-bottom:20px"><div class="panel-content"><form id="lookup-form" class="form-row"><div class="field"><label for="lookup-phone">Phone number</label><input id="lookup-phone" type="tel" placeholder="Enter your booking phone" required></div><div style="display:flex;align-items:end"><button class="primary-button" type="submit">Find my visits</button></div></form></div></div>
+        <div class="content-panel"><div class="panel-heading"><div><h2>Appointment history</h2><p id="visit-caption">Enter your phone number to see your visits.</p></div></div><div class="panel-content"><div class="booking-list" id="customer-booking-list"><div class="empty-state"><strong>All in good time.</strong>Your confirmed and upcoming appointments will appear here.</div></div></div></div>
+        <div class="content-panel" id="customer-review-panel" hidden style="margin-top:16px"><div class="panel-heading"><div><h2>Rate your visit</h2><p>Share feedback about a barber-confirmed appointment.</p></div></div><div class="panel-content"><form class="review-form" id="review-form"><div class="field"><label for="review-appointment">Appointment</label><select id="review-appointment" required></select></div><div class="field"><label>Rating</label><div class="star-picker" role="radiogroup" aria-label="Choose a rating"><label><input type="radio" name="rating" value="1" required><span aria-hidden="true">★</span><span class="sr-only">1 star</span></label><label><input type="radio" name="rating" value="2"><span aria-hidden="true">★</span><span class="sr-only">2 stars</span></label><label><input type="radio" name="rating" value="3"><span aria-hidden="true">★</span><span class="sr-only">3 stars</span></label><label><input type="radio" name="rating" value="4"><span aria-hidden="true">★</span><span class="sr-only">4 stars</span></label><label><input type="radio" name="rating" value="5"><span aria-hidden="true">★</span><span class="sr-only">5 stars</span></label></div></div><div class="field"><label for="review-text">Your review</label><textarea id="review-text" minlength="10" maxlength="800" placeholder="What did you think of your cut and service?" required></textarea></div><p class="review-status" id="review-status">Only your first name, service, and review are shown publicly.</p><div><button class="primary-button" type="submit">Submit review</button></div></form></div></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-login" aria-label="Protected workspace sign in">
+      <div class="page-wrap" style="max-width:660px">
+        <div class="page-title-row"><div><p class="eyebrow">Protected workspaces</p><h1>Staff sign in</h1><p>Choose the workspace you are authorized to access.</p></div></div>
+        <form class="form-panel" id="login-form">
+          <div class="field"><label for="login-role">Workspace</label><select id="login-role" required><option value="barber">Barber desk</option><option value="admin">Admin dashboard</option><option value="database">Database records</option></select></div>
+          <div class="field" style="margin-top:14px"><label for="login-password">Password</label><input id="login-password" type="password" autocomplete="current-password" required></div>
+          <div class="form-foot"><span class="subtle-note" style="margin:0">Each workspace has separate access.</span><button class="primary-button" type="submit">Sign in →</button></div>
+        </form>
+      </div>
+    </section>
+
+    <section class="view" id="view-admin" aria-label="Admin dashboard">
+      <div class="page-wrap" style="max-width:900px">
+        <div class="page-title-row"><div><p class="eyebrow">Administrator workspace</p><h1>Admin dashboard</h1><p>Review incoming appointments and check service details.</p></div><span class="status accepted">Read only</span></div>
+        <div class="metric-grid" id="admin-metrics"></div>
+        <div class="content-panel"><div class="panel-heading"><div><h2>Appointment oversight</h2><p>For changes or customer rescheduling, ask the barber to review the request.</p></div><span id="admin-pending-count" class="status pending">0 pending</span></div><div class="panel-content"><div class="booking-list" id="admin-booking-list"></div></div></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-barber" aria-label="Barber dashboard">
+      <div class="page-wrap">
+        <div class="page-title-row"><div><p class="eyebrow">Staff workspace</p><h1>Barber desk</h1><p>Manage your hours and respond to customer requests.</p></div><span class="status accepted">Schedule active</span></div>
+        <div class="metric-grid" id="barber-metrics"></div>
+        <div class="content-panel" style="margin-bottom:20px">
+          <div class="panel-heading"><div><h2>Working hours</h2><p>Only dates and times within this schedule are offered to customers.</p></div></div>
+          <div class="panel-content"><form id="schedule-form"><div class="schedule-layout"><div class="schedule-fields"><div class="field"><label for="schedule-start">Opens</label><input id="schedule-start" type="time" required></div><div class="field"><label for="schedule-end">Closes</label><input id="schedule-end" type="time" required></div></div><div><div class="field" style="margin-bottom:11px"><label>Working days</label></div><div class="days-grid" id="working-days"></div></div></div><button class="compact-button" type="submit">Save working hours</button></form></div>
+        </div>
+        <div class="content-panel"><div class="panel-heading"><div><h2>Appointment requests</h2><p>Accept, decline, or offer a new time for a pending request.</p></div><span id="pending-count" class="status pending">0 pending</span></div><div class="panel-content"><div class="booking-list" id="barber-booking-list"></div></div></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-database" aria-label="Database dashboard">
+      <div class="page-wrap">
+        <div class="page-title-row"><div><p class="eyebrow">Restricted workspace</p><h1>Database</h1><p>Protected appointment records.</p></div><div class="database-tools"><button class="compact-button" id="export-data" type="button">Export JSON ↓</button><button class="action-button danger" id="clear-data" type="button">Clear records</button></div></div>
+        <div class="data-summary" id="database-summary"></div>
+        <div class="content-panel" style="margin-bottom:18px"><div class="panel-heading"><div><h2>Appointment records</h2><p>Customer, preferred barber, location, service, and payment details.</p></div></div><div class="table-wrap"><table><thead><tr><th>Reference</th><th>Customer</th><th>Appointment</th><th>Barber</th><th>Location</th><th>Services</th><th>Total</th><th>Payment</th><th>Status</th></tr></thead><tbody id="database-rows"></tbody></table></div></div>
+        <div class="content-panel"><div class="panel-heading"><div><h2>Customer reviews</h2><p>Ratings and review text linked to confirmed appointments.</p></div></div><div class="table-wrap"><table><thead><tr><th>Appointment</th><th>Rating</th><th>Review</th><th>Submitted</th></tr></thead><tbody id="database-review-rows"></tbody></table></div></div>
+        <p class="database-note"><strong>Access:</strong> This workspace is server-protected and uses a separate password. Admins can review appointment details but cannot export or clear records; those database controls stay here.</p>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="reschedule-dialog" aria-labelledby="reschedule-title">
+    <form class="dialog-inner" id="reschedule-form">
+      <h2 id="reschedule-title">Offer a new time</h2><p id="reschedule-description">Choose an available appointment slot for this customer.</p>
+      <div class="dialog-fields"><div class="field"><label for="reschedule-date">New date</label><input id="reschedule-date" type="date" required></div><div class="field"><label for="reschedule-time">Available times</label><select id="reschedule-time" required disabled><option value="">Select a date first</option></select></div></div>
+      <div class="dialog-actions"><button class="compact-button" type="button" id="cancel-reschedule">Cancel</button><button class="primary-button" type="submit">Send new time</button></div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+      const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const STYLES = [
+        { id: 'classic', name: 'Classic cut', price: 2500, minutes: 45 },
+        { id: 'fade', name: 'Skin fade', price: 3500, minutes: 60 },
+        { id: 'taper', name: 'Taper fade', price: 3500, minutes: 60 },
+        { id: 'scissor', name: 'Scissor cut', price: 4000, minutes: 60 },
+        { id: 'afro', name: 'Afro shape-up', price: 3000, minutes: 45 },
+        { id: 'design', name: 'Custom design', price: 5500, minutes: 75 }
+      ];
+      const SERVICES = [
+        { id: 'beard', name: 'Beard sculpt & line-up', price: 2000, minutes: 20 },
+        { id: 'wash', name: 'Wash & condition', price: 1800, minutes: 15 },
+        { id: 'steaming', name: 'Hot towel treatment', price: 2500, minutes: 20 },
+        { id: 'colour', name: 'Hair colour refresh', price: 6500, minutes: 45 }
+      ];
+      const DEFAULT_SCHEDULE = { start: '09:00', end: '17:00', days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] };
+      const $ = (selector, root = document) => root.querySelector(selector);
+      const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+      const money = amount => `KSh ${Number(amount).toLocaleString('en-KE')}`;
+      const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+      const today = () => {
+        const date = new Date();
+        date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+        return date.toISOString().slice(0, 10);
+      };
+      function loadData() {
+        localStorage.removeItem('premium-barber-v1');
+        return { appointments: [], schedule: { ...DEFAULT_SCHEDULE } };
+      }
+      let data = { ...loadData(), reviews: [] };
+      let currentRole = null;
+      let selectedTime = '';
+      let activeRescheduleId = null;
+      let toastTimer;
+      async function api(path, options = {}) {
+        const response = await fetch(path, {
+          credentials: 'same-origin',
+          ...options,
+          headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'The request could not be completed.');
+        return result;
+      }
+      function saveData() {
+        renderDashboards();
+      }
+      function showToast(message) {
+        const toast = $('#toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+      }
+      function getStyle(id) { return STYLES.find(style => style.id === id); }
+      function renderHoursSummary() {
+        const days = data.schedule.days.map(day => day.slice(0, 3)).join(' · ') || 'No working days';
+        const formatTime = value => new Date(`2000-01-01T${value}:00`).toLocaleTimeString('en-KE', { hour: 'numeric', minute: '2-digit' });
+        $('#public-hours').innerHTML = `<strong>${safe(days)}</strong> · ${safe(formatTime(data.schedule.start))}–${safe(formatTime(data.schedule.end))}`;
+      }
+      function getServices(ids) { return SERVICES.filter(service => ids.includes(service.id)); }
+      function totalFor(appointment) { return (getStyle(appointment.styleId)?.price || 0) + getServices(appointment.serviceIds || []).reduce((sum, service) => sum + service.price, 0); }
+      function durationFor(appointment) { return (getStyle(appointment.styleId)?.minutes || 45) + getServices(appointment.serviceIds || []).reduce((sum, service) => sum + service.minutes, 0); }
+      function localDateTime(date, time) { return new Date(`${date}T${time}:00`); }
+      function formatDate(date, time) { return localDateTime(date, time).toLocaleString('en-KE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }); }
+      function selectedServices() { return $$('.service-option input:checked').map(input => input.value); }
+      function bookingDuration() {
+        const style = getStyle($('input[name="style"]:checked')?.value);
+        return (style?.minutes || 0) + getServices(selectedServices()).reduce((sum, service) => sum + service.minutes, 0);
+      }
+      function renderChoices() {
+        $('#style-options').innerHTML = STYLES.map(style => `<div class="style-option"><input id="style-${style.id}" type="radio" name="style" value="${style.id}" required><label for="style-${style.id}"><span class="style-name">${safe(style.name)}</span><span class="style-price">${money(style.price)}</span></label></div>`).join('');
+        $('#service-options').innerHTML = SERVICES.map(service => `<div class="service-option"><input id="service-${service.id}" type="checkbox" value="${service.id}"><label for="service-${service.id}"><span class="service-name">${safe(service.name)}</span><span class="service-price">${money(service.price)}</span></label></div>`).join('');
+        $('#working-days').innerHTML = DAYS.map(day => `<label class="day-toggle"><input type="checkbox" value="${day}" ${data.schedule.days.includes(day) ? 'checked' : ''}>${day.slice(0, 3)}</label>`).join('');
+        $('#schedule-start').value = data.schedule.start;
+        $('#schedule-end').value = data.schedule.end;
+        $('#appointment-date').min = today();
+        $('#reschedule-date').min = today();
+        renderHoursSummary();
+      }
+      async function fillTimeSelect(select, date, styleId, serviceIds, barber, exceptId = null) {
+        if (!date || !styleId || !barber) {
+          select.innerHTML = '<option value="">Choose a cut, barber, and date first</option>';
+          select.disabled = true;
+          return [];
+        }
+        const query = new URLSearchParams({ date, style: styleId, services: serviceIds.join(','), barber });
+        if (exceptId) query.set('except', exceptId);
+        const { times } = await api(`/api/availability?${query}`);
+        select.innerHTML = times.length ? '<option value="">Choose a time</option>' + times.map(time => `<option value="${time}">${new Date(`2000-01-01T${time}:00`).toLocaleTimeString('en-KE', { hour: 'numeric', minute: '2-digit' })}</option>`).join('') : '<option value="">No available times</option>';
+        select.disabled = !times.length;
+        return times;
+      }
+      async function refreshBookingTimes() {
+        selectedTime = '';
+        try {
+          await fillTimeSelect($('#appointment-time'), $('#appointment-date').value, $('input[name="style"]:checked')?.value, selectedServices(), $('#preferred-barber').value);
+        } catch (error) {
+          showToast(error.message);
+        }
+      }
+      function updateTotal() {
+        const style = getStyle($('input[name="style"]:checked')?.value);
+        const total = (style?.price || 0) + getServices(selectedServices()).reduce((sum, service) => sum + service.price, 0);
+        $('#booking-total').textContent = money(total);
+      }
+      function statusMarkup(status) { return `<span class="status ${safe(status)}">${safe(status.charAt(0).toUpperCase() + status.slice(1))}</span>`; }
+      function serviceNames(appointment) { return [getStyle(appointment.styleId)?.name, ...getServices(appointment.serviceIds || []).map(service => service.name)].filter(Boolean).join(' · '); }
+      function bookingMarkup(appointment, admin = false) {
+        const actions = admin && appointment.status === 'pending' ? `<div class="booking-actions"><button class="action-button accept" data-action="accept" data-id="${safe(appointment.id)}">Accept</button><button class="action-button" data-action="reschedule" data-id="${safe(appointment.id)}">Reschedule</button><button class="action-button reject" data-action="reject" data-id="${safe(appointment.id)}">Decline</button></div>` : '';
+        const reviewStatus = appointment.reviewed ? `<span class="booking-detail">Reviewed · ${'★'.repeat(appointment.review.rating)}</span>` : '';
+        return `<article class="booking-card"><div><span class="booking-person">${safe(appointment.name)}</span><span class="booking-phone">${safe(appointment.phone)} · ${statusMarkup(appointment.status)}</span></div><div><span class="booking-detail"><strong>${safe(formatDate(appointment.date, appointment.time))}</strong></span><span class="booking-detail">${safe(serviceNames(appointment))}</span><span class="booking-detail">${safe(appointment.barber)} · ${safe(appointment.location)}</span><span class="booking-detail">${money(totalFor(appointment))} · ${safe(appointment.payment)}</span>${appointment.note ? `<span class="booking-detail">Note: ${safe(appointment.note)}</span>` : ''}${reviewStatus}</div>${actions}</article>`;
+      }
+      function renderBarber() {
+        const pending = data.appointments.filter(appointment => appointment.status === 'pending');
+        const todayAppointments = data.appointments.filter(appointment => appointment.date === today() && appointment.status !== 'rejected');
+        const accepted = data.appointments.filter(appointment => appointment.status === 'accepted' || appointment.status === 'rescheduled');
+        $('#barber-metrics').innerHTML = `<div class="metric"><span>Requests to review</span><strong>${pending.length}</strong><small>Waiting for your response</small></div><div class="metric"><span>Today's appointments</span><strong>${todayAppointments.length}</strong><small>Active bookings</small></div><div class="metric"><span>Accepted visits</span><strong>${accepted.length}</strong><small>Across all dates</small></div><div class="metric"><span>Working days</span><strong>${data.schedule.days.length}</strong><small>${safe(data.schedule.start)} – ${safe(data.schedule.end)}</small></div>`;
+        $('#pending-count').textContent = `${pending.length} pending`;
+        const appointments = [...data.appointments].sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`));
+        $('#barber-booking-list').innerHTML = appointments.length ? appointments.map(appointment => bookingMarkup(appointment, true)).join('') : '<div class="empty-state"><strong>No appointment requests yet.</strong>New customer bookings will appear here for your review.</div>';
+      }
+      function renderAdmin() {
+        const pending = data.appointments.filter(appointment => appointment.status === 'pending');
+        const active = data.appointments.filter(appointment => appointment.status !== 'rejected');
+        const todayAppointments = active.filter(appointment => appointment.date === today());
+        const accepted = data.appointments.filter(appointment => appointment.status === 'accepted' || appointment.status === 'rescheduled');
+        $('#admin-metrics').innerHTML = `<div class="metric"><span>Total appointments</span><strong>${data.appointments.length}</strong><small>All customer requests</small></div><div class="metric"><span>Awaiting barber</span><strong>${pending.length}</strong><small>Needs a decision</small></div><div class="metric"><span>Today's visits</span><strong>${todayAppointments.length}</strong><small>Not declined</small></div><div class="metric"><span>Accepted or rescheduled</span><strong>${accepted.length}</strong><small>Barber-confirmed visits</small></div>`;
+        $('#admin-pending-count').textContent = `${pending.length} pending`;
+        const appointments = [...data.appointments].sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`));
+        $('#admin-booking-list').innerHTML = appointments.length ? appointments.map(appointment => bookingMarkup(appointment)).join('') : '<div class="empty-state"><strong>No appointments yet.</strong>New customer requests will appear here for review.</div>';
+      }
+      async function renderCustomerList(phone) {
+        const normalized = phone.replace(/\D/g, '');
+        try {
+          const result = await api(`/api/my-visits?phone=${encodeURIComponent(normalized)}`);
+          const matches = result.appointments;
+          $('#visit-caption').textContent = matches.length ? `${matches.length} appointment${matches.length === 1 ? '' : 's'} found.` : 'No appointments found for that phone number.';
+          $('#customer-booking-list').innerHTML = matches.length ? matches.map(appointment => bookingMarkup(appointment)).join('') : '<div class="empty-state"><strong>No visits found.</strong>Check the phone number you used when booking.</div>';
+          const eligible = matches.filter(appointment => ['accepted', 'rescheduled'].includes(appointment.status) && !appointment.reviewed);
+          const reviewPanel = $('#customer-review-panel');
+          reviewPanel.hidden = !matches.length;
+          $('#review-form').hidden = !eligible.length;
+          $('#review-appointment').innerHTML = eligible.map(appointment => `<option value="${safe(appointment.id)}">${safe(formatDate(appointment.date, appointment.time))} · ${safe(serviceNames(appointment))}</option>`).join('');
+          $('#review-status').textContent = eligible.length
+            ? 'Only your first name, service, and review are shown publicly.'
+            : 'A confirmed, not-yet-reviewed appointment is needed before you can leave feedback.';
+        } catch (error) {
+          showToast(error.message);
+        }
+      }
+      function renderPublicReviews(result) {
+        data.reviews = result.reviews;
+        $('#rating-average').textContent = result.average === null ? 'New' : result.average.toFixed(1);
+        $('#rating-stars').textContent = result.average === null ? '☆☆☆☆☆' : `${'★'.repeat(Math.round(result.average))}${'☆'.repeat(5 - Math.round(result.average))}`;
+        $('#rating-stars').setAttribute('aria-label', result.average === null ? 'No reviews yet' : `${result.average} out of 5 stars`);
+        $('#rating-count').textContent = result.count === 1 ? '1 customer review' : `${result.count} customer reviews`;
+        $('#public-review-list').innerHTML = result.reviews.length ? result.reviews.map(review => `<article class="public-review"><div class="rating-stars" aria-label="${review.rating} out of 5 stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div><blockquote>“${safe(review.review)}”</blockquote><div class="public-review-meta">${safe(review.author)} · ${safe(review.service)}</div></article>`).join('') : '<p class="review-status">Be the first to share a review after your confirmed visit.</p>';
+      }
+      function configureSharing() {
+        const shareUrl = new URL('/', window.location.href).href;
+        const shareText = 'Premium Barber in Nairobi and Mombasa — thoughtful cuts and a chair kept just for you.';
+        $('#share-whatsapp').href = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+        $('#share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+        $('#share-x').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+        $('#share-telegram').href = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+        $('#share-email').href = `mailto:?subject=${encodeURIComponent('A good barber in Nairobi')}&body=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`;
+        $('#copy-share-link').addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(shareUrl);
+            showToast('Booking link copied.');
+          } catch {
+            showToast('Copy this link from your browser: ' + shareUrl);
+          }
+        });
+        $('#share-native').addEventListener('click', async () => {
+          if (navigator.share) {
+            try { await navigator.share({ title: 'Premium Barber', text: shareText, url: shareUrl }); } catch {}
+          } else {
+            try {
+              await navigator.clipboard.writeText(shareUrl);
+              showToast('Booking link copied.');
+            } catch {
+              showToast('Choose a social app above to share the booking link.');
+            }
+          }
+        });
+      }
+      function renderDatabase() {
+        const accepted = data.appointments.filter(appointment => appointment.status === 'accepted' || appointment.status === 'rescheduled').length;
+        const pending = data.appointments.filter(appointment => appointment.status === 'pending').length;
+        const revenue = data.appointments.filter(appointment => appointment.status === 'accepted' || appointment.status === 'rescheduled').reduce((sum, appointment) => sum + totalFor(appointment), 0);
+        $('#database-summary').innerHTML = `<div class="data-tile"><span>Total appointment records</span><strong>${data.appointments.length}</strong></div><div class="data-tile"><span>Awaiting response</span><strong>${pending}</strong></div><div class="data-tile"><span>Accepted value · not collected</span><strong>${money(revenue)}</strong></div>`;
+        const rows = [...data.appointments].sort((a, b) => `${b.date}T${b.time}`.localeCompare(`${a.date}T${a.time}`));
+        $('#database-rows').innerHTML = rows.length ? rows.map(appointment => `<tr><td>${safe(appointment.id.slice(-8).toUpperCase())}</td><td>${safe(appointment.name)}<br><span style="color:#898a81">${safe(appointment.phone)}</span></td><td>${safe(formatDate(appointment.date, appointment.time))}</td><td>${safe(appointment.barber)}</td><td>${safe(appointment.location)}</td><td>${safe(serviceNames(appointment))}</td><td>${money(totalFor(appointment))}</td><td>${safe(appointment.payment)}</td><td>${statusMarkup(appointment.status)}</td></tr>`).join('') : '<tr><td colspan="9"><div class="empty-state"><strong>No records yet.</strong>Appointment requests will be listed here.</div></td></tr>';
+        $('#database-review-rows').innerHTML = data.reviews.length ? data.reviews.map(review => `<tr><td>${safe(review.appointment_id)}</td><td>${review.rating} / 5</td><td>${safe(review.review)}</td><td>${safe(new Date(review.created_at).toLocaleDateString('en-KE'))}</td></tr>`).join('') : '<tr><td colspan="4">No customer reviews yet.</td></tr>';
+      }
+      function renderDashboards() {
+        if (currentRole === 'barber') renderBarber();
+        if (currentRole === 'admin') renderAdmin();
+        if (currentRole === 'database') renderDatabase();
+      }
+      function renderNavigation() {
+        const nav = $('#main-navigation');
+        const items = currentRole === 'barber'
+          ? [['book', 'Book a visit'], ['visits', 'My visits'], ['barber', 'Barber desk']]
+          : currentRole === 'admin'
+            ? [['admin', 'Admin dashboard']]
+            : currentRole === 'database'
+              ? [['database', 'Database']]
+              : [['book', 'Book a visit'], ['visits', 'My visits'], ['login', 'Staff sign in']];
+        nav.innerHTML = items.map(([view, label]) => `<button type="button" data-view="${view}">${label}</button>`).join('')
+          + (currentRole ? '<button type="button" data-logout>Sign out</button>' : '');
+        $$('[data-view]', nav).forEach(button => button.addEventListener('click', () => setView(button.dataset.view)));
+        $('[data-logout]', nav)?.addEventListener('click', logout);
+      }
+      function setView(viewName) {
+        const requiredRole = { barber: 'barber', admin: 'admin', database: 'database' }[viewName];
+        if (requiredRole && currentRole !== requiredRole) {
+          $('#login-role').value = requiredRole;
+          viewName = 'login';
+        }
+        $$('.view').forEach(view => view.classList.toggle('active', view.id === `view-${viewName}`));
+        $$('.nav button').forEach(button => button.classList.toggle('active', button.dataset.view === viewName));
+        if (viewName === 'barber' || viewName === 'admin' || viewName === 'database') renderDashboards();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      function handleBarberAction(event) {
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+        const appointment = data.appointments.find(item => item.id === button.dataset.id);
+        if (!appointment || appointment.status !== 'pending') return;
+        if (button.dataset.action === 'accept') {
+          updateAppointment(appointment.id, { action: 'accept' }, 'Appointment accepted. The customer can see the update in My visits.');
+        } else if (button.dataset.action === 'reject') {
+          updateAppointment(appointment.id, { action: 'reject' }, 'Appointment declined.');
+        } else if (button.dataset.action === 'reschedule') {
+          activeRescheduleId = appointment.id;
+          $('#reschedule-description').textContent = `Offer a new time to ${appointment.name}. The original time stays reserved until the new time is sent.`;
+          $('#reschedule-date').value = '';
+          $('#reschedule-time').innerHTML = '<option value="">Select a date first</option>';
+          $('#reschedule-time').disabled = true;
+          $('#reschedule-dialog').showModal();
+        }
+      }
+      async function updateAppointment(id, payload, successMessage) {
+        try {
+          await api(`/api/appointments/${encodeURIComponent(id)}/action`, { method: 'POST', body: JSON.stringify(payload) });
+          await refreshWorkspaceData();
+          showToast(successMessage);
+        } catch (error) {
+          showToast(error.message);
+        }
+      }
+      async function refreshWorkspaceData({ notify = false } = {}) {
+        const role = currentRole;
+        const { schedule } = await api('/api/schedule');
+        if (role !== currentRole) return;
+        data.schedule = schedule;
+        renderChoices();
+        if (role === 'barber' || role === 'admin') {
+          const result = await api('/api/appointments');
+          if (role !== currentRole) return;
+          const previousIds = new Set(data.appointments.map(appointment => appointment.id));
+          data.appointments = result.appointments;
+          const newRequests = data.appointments.filter(appointment => appointment.status === 'pending' && !previousIds.has(appointment.id));
+          if (notify && newRequests.length) {
+            showToast(`${newRequests.length} new appointment request${newRequests.length === 1 ? '' : 's'} received.`);
+          }
+        } else if (role === 'database') {
+          const result = await api('/api/export');
+          if (role !== currentRole) return;
+          data.appointments = result.appointments;
+          data.reviews = result.reviews;
+        } else {
+          data.appointments = [];
+        }
+        renderDashboards();
+      }
+      async function activateRole(role) {
+        currentRole = role;
+        renderNavigation();
+        await refreshWorkspaceData();
+        setView(role);
+      }
+      async function logout() {
+        try { await api('/api/logout', { method: 'POST', body: '{}' }); } catch {}
+        currentRole = null;
+        data.appointments = [];
+        renderNavigation();
+        setView('book');
+      }
+      async function exportData() {
+        let exportPayload;
+        try {
+          exportPayload = await api('/api/export');
+        } catch (error) {
+          showToast(error.message);
+          return;
+        }
+        const blob = new Blob([JSON.stringify({ ...exportPayload, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `premium-barber-records-${today()}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+      $$('[data-go]').forEach(button => button.addEventListener('click', () => setView(button.dataset.go)));
+      $('#style-options').addEventListener('change', () => { updateTotal(); refreshBookingTimes(); });
+      $('#service-options').addEventListener('change', () => { updateTotal(); refreshBookingTimes(); });
+      $('#appointment-date').addEventListener('change', refreshBookingTimes);
+      $('#preferred-barber').addEventListener('change', refreshBookingTimes);
+      $('#login-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const passwordInput = $('#login-password');
+        try {
+          const result = await api('/api/login', { method: 'POST', body: JSON.stringify({ role: $('#login-role').value, password: passwordInput.value }) });
+          passwordInput.value = '';
+          await activateRole(result.role);
+        } catch (error) {
+          showToast(error.message);
+          passwordInput.select();
+        }
+      });
+      $('#booking-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!form.reportValidity()) return;
+        const styleId = $('input[name="style"]:checked')?.value;
+        const date = $('#appointment-date').value;
+        const time = $('#appointment-time').value;
+        const appointment = {
+          name: $('#customer-name').value.trim(), phone: $('#customer-phone').value.trim(), styleId,
+          barber: $('#preferred-barber').value, location: $('#preferred-location').value,
+          serviceIds: selectedServices(), date, time, payment: $('#payment-method').value,
+          note: $('#booking-note').value.trim()
+        };
+        if (!appointment.name || !appointment.phone || totalFor(appointment) < 1500 || totalFor(appointment) > 80000) {
+          showToast('Enter your details and choose services between KSh 1,500 and KSh 80,000.');
+          return;
+        }
+        try {
+          await api('/api/appointments', { method: 'POST', body: JSON.stringify(appointment) });
+          form.reset();
+          $('#appointment-time').innerHTML = '<option value="">Select a date first</option>';
+          $('#appointment-time').disabled = true;
+          $('#booking-total').textContent = money(0);
+          $('#lookup-phone').value = appointment.phone;
+          await renderCustomerList(appointment.phone);
+          showToast('Request sent. Your barber will confirm your appointment shortly.');
+          setView('visits');
+        } catch (error) {
+          showToast(error.message);
+          await refreshBookingTimes();
+        }
+      });
+      $('#lookup-form').addEventListener('submit', event => { event.preventDefault(); renderCustomerList($('#lookup-phone').value.trim()); });
+      $('#review-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!form.reportValidity()) return;
+        const phone = $('#lookup-phone').value.trim();
+        const payload = {
+          appointmentId: $('#review-appointment').value,
+          phone,
+          rating: Number($('input[name="rating"]:checked')?.value),
+          review: $('#review-text').value.trim()
+        };
+        try {
+          await api('/api/reviews', { method: 'POST', body: JSON.stringify(payload) });
+          form.reset();
+          await renderCustomerList(phone);
+          renderPublicReviews(await api('/api/reviews'));
+          showToast('Thanks for sharing your review.');
+        } catch (error) {
+          showToast(error.message);
+        }
+      });
+      $('#barber-booking-list').addEventListener('click', handleBarberAction);
+      $('#schedule-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const start = $('#schedule-start').value;
+        const end = $('#schedule-end').value;
+        const days = $$('#working-days input:checked').map(input => input.value);
+        if (start >= end || !days.length) { showToast('Choose at least one working day and an end time after opening.'); return; }
+        try {
+          const result = await api('/api/schedule', { method: 'POST', body: JSON.stringify({ start, end, days }) });
+          data.schedule = result.schedule;
+          renderChoices();
+          showToast('Working hours saved. Customer availability is updated.');
+        } catch (error) {
+          showToast(error.message);
+        }
+      });
+      $('#reschedule-date').addEventListener('change', async () => {
+        const appointment = data.appointments.find(item => item.id === activeRescheduleId);
+        if (!appointment) return;
+        try {
+          await fillTimeSelect($('#reschedule-time'), $('#reschedule-date').value, appointment.styleId, appointment.serviceIds, appointment.barber, activeRescheduleId);
+        } catch (error) {
+          showToast(error.message);
+        }
+      });
+      $('#reschedule-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const appointment = data.appointments.find(item => item.id === activeRescheduleId);
+        const date = $('#reschedule-date').value;
+        const time = $('#reschedule-time').value;
+        if (!appointment || appointment.status !== 'pending' || !time) {
+          showToast('Choose an available appointment time.');
+          return;
+        }
+        try {
+          await api(`/api/appointments/${encodeURIComponent(appointment.id)}/action`, { method: 'POST', body: JSON.stringify({ action: 'reschedule', date, time }) });
+          $('#reschedule-dialog').close();
+          await refreshWorkspaceData();
+          showToast('New time sent. The appointment is marked rescheduled.');
+        } catch (error) {
+          showToast(error.message);
+        }
+      });
+      $('#cancel-reschedule').addEventListener('click', () => $('#reschedule-dialog').close());
+      $('#export-data').addEventListener('click', exportData);
+      $('#clear-data').addEventListener('click', async () => {
+        if (!window.confirm('Delete all appointment records from the database? This cannot be undone.')) return;
+        try {
+          await api('/api/database/clear', { method: 'POST', body: '{}' });
+          await refreshWorkspaceData();
+          showToast('Appointment records cleared.');
+        } catch (error) {
+          showToast(error.message);
+        }
+      });
+      async function initialize() {
+        renderChoices();
+        configureSharing();
+        renderNavigation();
+        try {
+          const session = await api('/api/session');
+          try { renderPublicReviews(await api('/api/reviews')); } catch {}
+          currentRole = session.role;
+          await refreshWorkspaceData();
+          renderNavigation();
+          setView(currentRole || 'book');
+        } catch (error) {
+          showToast('Start the local server with “py server.py” to use the app.');
+        }
+      }
+      setInterval(() => {
+        if (document.visibilityState === 'visible' && (currentRole === 'barber' || currentRole === 'admin')) {
+          refreshWorkspaceData({ notify: true }).catch(() => {});
+        }
+      }, 12000);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && (currentRole === 'barber' || currentRole === 'admin')) {
+          refreshWorkspaceData({ notify: true }).catch(() => {});
+        }
+      });
+      initialize();
+    })();
+  </script>
+</body>
+</html>
